@@ -1,0 +1,98 @@
+name: Produce episode
+
+on:
+  workflow_dispatch:
+    inputs:
+      episode_path:
+        description: Episode directory containing script.md (preferred)
+        required: false
+        type: string
+      script_path:
+        description: Path to a UTF-8 script file (used if episode_path is empty)
+        required: false
+        type: string
+      output_path:
+        description: Optional MP3 output path (defaults next to the script)
+        required: false
+        type: string
+      commit:
+        description: Commit the MP3 back to this branch with Git LFS
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Produce episode audio
+        id: tts
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          EPISODE_PATH: ${{ inputs.episode_path }}
+          SCRIPT_PATH: ${{ inputs.script_path }}
+          OUTPUT_PATH: ${{ inputs.output_path }}
+        run: |
+          set -euo pipefail
+          if [ -z "${XAI_API_KEY:-}" ]; then
+            echo "Missing repository secret XAI_API_KEY" >&2
+            exit 1
+          fi
+          args=()
+          if [ -n "${EPISODE_PATH}" ]; then
+            args+=(--episode "${EPISODE_PATH}")
+          elif [ -n "${SCRIPT_PATH}" ]; then
+            args+=(--script "${SCRIPT_PATH}")
+          else
+            echo "Provide episode_path or script_path" >&2
+            exit 1
+          fi
+          if [ -n "${OUTPUT_PATH}" ]; then
+            args+=(--output "${OUTPUT_PATH}")
+          fi
+          mp3_path="$(python tools/produce_episode.py "${args[@]}")"
+          if [ ! -f "${mp3_path}" ]; then
+            echo "TTS did not produce a file at ${mp3_path}" >&2
+            exit 1
+          fi
+          echo "mp3=${mp3_path}" >> "${GITHUB_OUTPUT}"
+          echo "Produced ${mp3_path}"
+
+      - name: Upload MP3 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: grok-blog-episode-mp3
+          if-no-files-found: error
+          path: ${{ steps.tts.outputs.mp3 }}
+
+      - name: Commit MP3 with Git LFS
+        if: ${{ inputs.commit }}
+        env:
+          MP3_PATH: ${{ steps.tts.outputs.mp3 }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          git lfs install
+          git add -- "${MP3_PATH}"
+          if git diff --cached --quiet; then
+            echo "No MP3 changes to commit"
+            exit 0
+          fi
+          git commit -m "Add produced episode audio"
+          git push
