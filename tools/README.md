@@ -1,14 +1,14 @@
-# TTS tools
+# 生产工具
 
-`produce_episode.py` turns a UTF-8 episode script into an MP3 via the
-[xAI Text to Speech API](https://docs.x.ai/developers/model-capabilities/audio/text-to-speech).
+`produce_episode.py` 把 UTF-8 剧集脚本合成 MP3，调用
+[xAI Text to Speech API](https://docs.x.ai/developers/model-capabilities/audio/text-to-speech)。
 
-## Requirements
+## 要求
 
-- Python 3.9+ (stdlib only; no `pip` packages)
-- Environment variable `XAI_API_KEY`
+- Python 3.9+（仅标准库）
+- 凭证：环境变量 `XAI_API_KEY`，或本机 `~/.grok/auth.json`
 
-Default synthesis settings:
+默认合成参数：
 
 | Field | Value |
 | --- | --- |
@@ -17,35 +17,36 @@ Default synthesis settings:
 | `language` | `zh` |
 | Output | MP3 |
 
-Scripts longer than 15,000 characters are split on paragraph/sentence
-boundaries and the MP3 parts are concatenated in order.
+超过约 14,000 字的脚本会按段落/句子切开，再按顺序拼接 MP3。Markdown 标题行（`#`）不会送进 TTS。
 
-## Local usage
+## 本地用法
 
 ```sh
 export XAI_API_KEY=your-key
 
-# From a script file (writes audio.mp3 next to the script)
+# 位置参数（写出 script.md 同目录的 audio.mp3）
+python tools/produce_episode.py path/to/episode/script.md
+
+# 显式 --script
 python tools/produce_episode.py --script path/to/script.md
 
-# From an episode directory that contains script.md
-python tools/produce_episode.py --episode books/software-engineering/a-philosophy-of-software-design/episodes/ch01
+# 剧集目录（内含 script.md）
+python tools/produce_episode.py --episode books/software-engineering/a-philosophy-of-software-design/episodes/00-preface
 
-# Inline text and explicit output path
-python tools/produce_episode.py --text "你好，欢迎收听 Grok博客。" --output /tmp/hello.mp3
+# 内联文本
+python tools/produce_episode.py --text "你好，欢迎收听 Grok博客。" -o /tmp/hello.mp3
 
-# Validate without calling the API
+# 不调用 API，只校验
 python tools/produce_episode.py --script path/to/script.md --dry-run
 ```
 
-Smoke-test copy (not book content) lives at `tools/examples/hello-zh.txt`.
+冒烟测试文案（非书籍内容）在 `tools/examples/hello-zh.txt`。
 
 ## GitHub Actions
 
-Workflow: [`.github/workflows/produce-episode.yml`](../.github/workflows/produce-episode.yml).
+工作流：[`.github/workflows/produce-episode.yml`](../.github/workflows/produce-episode.yml)。
 
-1. Add repository secret `XAI_API_KEY`.
-2. Run **Actions → Produce episode → Run workflow**.
-3. Provide either `episode_path` (directory with `script.md`) or `script_path`.
-4. The job uploads the MP3 as an artifact. Set `commit` to true to push the
-   file back with Git LFS (`**/*.mp3`).
+1. 添加仓库 Secret `XAI_API_KEY`。
+2. 打开 **Actions → Produce episode → Run workflow**。
+3. 填写 `episode_path`（含 `script.md` 的目录）或 `script_path`。
+4. 任务会上传 MP3 artifact。将 `commit` 设为 true 时，会用 Git LFS（`**/*.mp3`）推回仓库。

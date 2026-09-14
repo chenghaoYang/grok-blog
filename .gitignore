@@ -14,6 +14,8 @@ venv/
 .vscode/
 *.swp
 
-# Test / local output (tracked episode MP3s live under books/ via Git LFS)
+# Local TTS probes (tracked episode MP3s live under books/ via Git LFS)
 /tmp/
+probe.mp3
+**/verify-*.mp3
 *.log

@@ -2,13 +2,14 @@
 """Produce a Grok博客 episode MP3 via the xAI Grok Voice TTS API.
 
 Calls https://api.x.ai/v1/tts with voice_id=ara and language=zh by default.
-Auth: environment variable XAI_API_KEY (GitHub Actions secret of the same name).
+Auth: XAI_API_KEY, or ~/.grok/auth.json (same as a local Grok login).
 
 Stdlib only. Example:
 
     export XAI_API_KEY=...
+    python tools/produce_episode.py path/to/script.md
     python tools/produce_episode.py --script path/to/script.md
-    python tools/produce_episode.py --episode books/.../episodes/ch01
+    python tools/produce_episode.py --episode books/.../episodes/00-preface
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -25,9 +27,10 @@ from pathlib import Path
 TTS_URL = "https://api.x.ai/v1/tts"
 DEFAULT_VOICE_ID = "ara"
 DEFAULT_LANGUAGE = "zh"
-MAX_CHARS = 15_000
-DEFAULT_TIMEOUT_S = 180
+MAX_CHARS = 14_000
+DEFAULT_TIMEOUT_S = 300
 RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
+GROK_AUTH_PATH = Path.home() / ".grok" / "auth.json"
 
 
 class ProduceError(RuntimeError):
@@ -38,7 +41,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Synthesize a Grok博客 episode with xAI Grok Voice TTS.",
     )
-    source = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument(
+        "script_positional",
+        nargs="?",
+        type=Path,
+        help="Path to a UTF-8 script file (same as --script).",
+    )
+    source = parser.add_mutually_exclusive_group(required=False)
     source.add_argument("--script", type=Path, help="Path to a UTF-8 script file.")
     source.add_argument("--text", help="Inline text to synthesize.")
     source.add_argument(
@@ -47,11 +56,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Episode directory containing script.md (or script.txt).",
     )
     parser.add_argument(
+        "-o",
         "--output",
         type=Path,
         help="Output MP3 path. Default: next to the script as audio.mp3.",
     )
-    parser.add_argument("--voice-id", default=DEFAULT_VOICE_ID, help="TTS voice_id.")
+    parser.add_argument(
+        "--voice-id",
+        "--voice",
+        dest="voice_id",
+        default=DEFAULT_VOICE_ID,
+        help="TTS voice_id (default ara).",
+    )
     parser.add_argument("--language", default=DEFAULT_LANGUAGE, help="BCP-47 language.")
     parser.add_argument(
         "--speed",
@@ -70,7 +86,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Validate input and print request metadata without calling the API.",
     )
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--keep-headings",
+        action="store_true",
+        help="Do not strip Markdown heading lines from script files.",
+    )
+    args = parser.parse_args(argv)
+    flagged = args.script is not None or args.text is not None or args.episode is not None
+    if args.script_positional is not None:
+        if flagged:
+            parser.error("Do not combine a positional script with --script/--text/--episode.")
+        args.script = args.script_positional
+    elif not flagged:
+        parser.error("Provide a script path, --script, --text, or --episode.")
+    return args
 
 
 def resolve_script_path(args: argparse.Namespace) -> Path | None:
@@ -87,17 +116,27 @@ def resolve_script_path(args: argparse.Namespace) -> Path | None:
     return None
 
 
+def script_to_speech_text(md: str) -> str:
+    """Drop Markdown headings so chapter titles are not spoken twice."""
+    lines = [line for line in md.splitlines() if not line.startswith("#")]
+    text = "\n".join(lines).strip()
+    return re.sub(r"\n{3,}", "\n\n", text)
+
+
 def load_text(args: argparse.Namespace) -> str:
     if args.text is not None:
-        text = args.text
+        text = args.text.strip()
     else:
         script_path = resolve_script_path(args)
         assert script_path is not None
         try:
-            text = script_path.read_text(encoding="utf-8")
+            raw = script_path.read_text(encoding="utf-8")
         except OSError as exc:
             raise ProduceError(f"Cannot read script {script_path}: {exc}") from exc
-    text = text.strip()
+        if args.keep_headings:
+            text = raw.strip()
+        else:
+            text = script_to_speech_text(raw)
     if not text:
         raise ProduceError("Script text is empty.")
     return text
@@ -113,12 +152,29 @@ def resolve_output(args: argparse.Namespace) -> Path:
     return Path("audio.mp3")
 
 
+def load_grok_auth_key() -> str | None:
+    if not GROK_AUTH_PATH.is_file():
+        return None
+    try:
+        data = json.loads(GROK_AUTH_PATH.read_text(encoding="utf-8"))
+        entry = next(iter(data.values()))
+        key = str(entry.get("key", "")).strip()
+        return key or None
+    except (OSError, json.JSONDecodeError, StopIteration, AttributeError, TypeError):
+        return None
+
+
+def has_credentials() -> bool:
+    return bool(os.environ.get("XAI_API_KEY", "").strip() or load_grok_auth_key())
+
+
 def require_api_key() -> str:
-    api_key = os.environ.get("XAI_API_KEY", "").strip()
+    api_key = os.environ.get("XAI_API_KEY", "").strip() or load_grok_auth_key()
     if not api_key:
         raise ProduceError(
-            "Missing XAI_API_KEY. Export it in your shell or set the "
-            "GitHub Actions secret of the same name."
+            "Missing XAI_API_KEY. Export it in your shell, set the GitHub "
+            "Actions secret of the same name, or log in locally so "
+            "~/.grok/auth.json exists."
         )
     return api_key
 
@@ -179,7 +235,7 @@ def synthesize_chunk(
     *,
     api_key: str,
     timeout: int,
-    retries: int = 3,
+    retries: int = 4,
 ) -> bytes:
     body = json.dumps(payload).encode("utf-8")
     last_error: Exception | None = None
@@ -242,7 +298,7 @@ def produce(args: argparse.Namespace) -> Path:
                     "chunks": len(chunks),
                     "chunk_sizes": [len(chunk) for chunk in chunks],
                     "output": str(output),
-                    "has_api_key": bool(os.environ.get("XAI_API_KEY", "").strip()),
+                    "has_api_key": has_credentials(),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -254,7 +310,7 @@ def produce(args: argparse.Namespace) -> Path:
     parts: list[bytes] = []
     for index, chunk in enumerate(chunks, start=1):
         print(
-            f"Synthesizing chunk {index}/{len(chunks)} ({len(chunk)} chars) → {TTS_URL}",
+            f"TTS chunk {index}/{len(chunks)} chars={len(chunk)} → {TTS_URL}",
             file=sys.stderr,
         )
         payload = build_payload(
@@ -269,7 +325,7 @@ def produce(args: argparse.Namespace) -> Path:
 
     write_mp3(output, parts)
     size = output.stat().st_size
-    print(f"Wrote {size:,} bytes to {output}", file=sys.stderr)
+    print(f"wrote {output} ({size} bytes)", file=sys.stderr)
     print(output.resolve())
     return output
 
