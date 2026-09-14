@@ -1,0 +1,36 @@
+slug: a-philosophy-of-software-design
+title: 软件设计的哲学（第二版）
+title_en: A Philosophy of Software Design, 2nd Edition
+author: John Ousterhout
+translator_repo: https://github.com/yingang/aposd2e-zh
+license_note: 中译 CC-BY 4.0；脚本文为口语化改编
+theme: software-engineering
+voice:
+  provider: grok-voice
+  voice_id: ara
+  language: zh
+episodes_planned:
+  - 00-preface
+  - 01-intro
+  - 02-complexity
+  - 03-strategic
+  - 04-deep-modules
+  - 05-info-hiding
+  - 06-general-modules
+  - 07-different-layers
+  - 08-pull-complexity-down
+  - 09-together-or-apart
+  - 10-define-errors-out
+  - 11-design-it-twice
+  - 12-comments-excuses
+  - 13-comments-why
+  - 14-choosing-names
+  - 15-write-comments-first
+  - 16-modifying-existing
+  - 17-consistency
+  - 18-code-should-be-obvious
+  - 19-software-trends
+  - 20-performance
+  - 21-decide-what-matters
+  - 22-conclusion
+  - 23-summary

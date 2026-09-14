@@ -1,0 +1,8 @@
+themes:
+  - id: software-engineering
+    name: 软件工程
+    books:
+      - slug: a-philosophy-of-software-design
+        title: 软件设计的哲学（第二版）
+        title_en: A Philosophy of Software Design, 2nd Ed.
+        path: books/software-engineering/a-philosophy-of-software-design

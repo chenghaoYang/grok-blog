@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.pyc
+.env
+.venv/
+probe.mp3
+**/verify-*.mp3
+*.log
