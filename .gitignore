@@ -1,8 +1,21 @@
-.DS_Store
+# Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.egg-info/
 .venv/
+venv/
+.env
+.env.*
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local TTS probes (tracked episode MP3s live under books/ via Git LFS)
+/tmp/
 probe.mp3
 **/verify-*.mp3
 *.log

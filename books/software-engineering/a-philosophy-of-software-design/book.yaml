@@ -1,36 +1,129 @@
+id: a-philosophy-of-software-design
 slug: a-philosophy-of-software-design
-title: 软件设计的哲学（第二版）
+theme: software-engineering
+title:
+  en: A Philosophy of Software Design, 2nd Edition
+  zh: 软件设计的哲学，第二版
 title_en: A Philosophy of Software Design, 2nd Edition
 author: John Ousterhout
-translator_repo: https://github.com/yingang/aposd2e-zh
-license_note: 中译 CC-BY 4.0；脚本文为口语化改编
-theme: software-engineering
+language: zh
+voice_id: ara
 voice:
   provider: grok-voice
   voice_id: ara
   language: zh
-episodes_planned:
-  - 00-preface
-  - 01-intro
-  - 02-complexity
-  - 03-strategic
-  - 04-deep-modules
-  - 05-info-hiding
-  - 06-general-modules
-  - 07-different-layers
-  - 08-pull-complexity-down
-  - 09-together-or-apart
-  - 10-define-errors-out
-  - 11-design-it-twice
-  - 12-comments-excuses
-  - 13-comments-why
-  - 14-choosing-names
-  - 15-write-comments-first
-  - 16-modifying-existing
-  - 17-consistency
-  - 18-code-should-be-obvious
-  - 19-software-trends
-  - 20-performance
-  - 21-decide-what-matters
-  - 22-conclusion
-  - 23-summary
+translator_repo: https://github.com/yingang/aposd2e-zh
+license_note: 中译 CC-BY 4.0；脚本文为口语化改编
+
+source:
+  original:
+    title: A Philosophy of Software Design, 2nd Edition
+    author: John Ousterhout
+  translation:
+    title: 《软件设计的哲学，第二版》中文翻译
+    url: https://github.com/yingang/aposd2e-zh
+    license: CC-BY 4.0
+    online:
+      zh: https://yingang.github.io/aposd2e-zh/
+      zh-tw: https://yingang.github.io/aposd2e-zh/zh-tw/
+
+# Episode ids match folders under episodes/. Titles for 00–03 come from
+# those episodes' meta.json; remaining titles match the translation TOC:
+# https://github.com/yingang/aposd2e-zh#目录
+episodes:
+  - id: 00-preface
+    title: 前言：为什么需要一本讲软件设计的书
+    source: docs/preface.md
+    status: script
+  - id: 01-intro
+    title: 第1章 介绍：软件最大的限制是理解力
+    source: docs/ch01.md
+    status: script
+  - id: 02-complexity
+    title: 第2章 复杂性的本质
+    source: docs/ch02.md
+    status: script
+  - id: 03-strategic
+    title: 第3章 能工作的代码是不够的
+    source: docs/ch03.md
+    status: script
+  - id: 04-deep-modules
+    title: 第 4 章 模块应该是深的
+    source: docs/ch04.md
+    status: placeholder
+  - id: 05-info-hiding
+    title: 第 5 章 信息隐藏和信息泄露
+    source: docs/ch05.md
+    status: placeholder
+  - id: 06-general-modules
+    title: 第 6 章 通用的模块是更深的
+    source: docs/ch06.md
+    status: placeholder
+  - id: 07-different-layers
+    title: 第 7 章 不同的层级，不同的抽象
+    source: docs/ch07.md
+    status: placeholder
+  - id: 08-pull-complexity-down
+    title: 第 8 章 下沉复杂性
+    source: docs/ch08.md
+    status: placeholder
+  - id: 09-together-or-apart
+    title: 第 9 章 在一起更好还是分开更好？
+    source: docs/ch09.md
+    status: placeholder
+  - id: 10-define-errors-out
+    title: 第 10 章 通过定义来规避错误
+    source: docs/ch10.md
+    status: placeholder
+  - id: 11-design-it-twice
+    title: 第 11 章 设计两次
+    source: docs/ch11.md
+    status: placeholder
+  - id: 12-comments-excuses
+    title: 第 12 章 不写注释的四个借口
+    source: docs/ch12.md
+    status: placeholder
+  - id: 13-comments-why
+    title: 第 13 章 注释应该描述代码中难以理解的内容
+    source: docs/ch13.md
+    status: placeholder
+  - id: 14-choosing-names
+    title: 第 14 章 选取名称
+    source: docs/ch14.md
+    status: placeholder
+  - id: 15-write-comments-first
+    title: 第 15 章 先写注释
+    source: docs/ch15.md
+    status: placeholder
+  - id: 16-modifying-existing
+    title: 第 16 章 修改现有的代码
+    source: docs/ch16.md
+    status: placeholder
+  - id: 17-consistency
+    title: 第 17 章 一致性
+    source: docs/ch17.md
+    status: placeholder
+  - id: 18-code-should-be-obvious
+    title: 第 18 章 代码应该是易理解的
+    source: docs/ch18.md
+    status: placeholder
+  - id: 19-software-trends
+    title: 第 19 章 软件发展趋势
+    source: docs/ch19.md
+    status: placeholder
+  - id: 20-performance
+    title: 第 20 章 性能设计
+    source: docs/ch20.md
+    status: placeholder
+  - id: 21-decide-what-matters
+    title: 第 21 章 决定什么是重要的
+    source: docs/ch21.md
+    status: placeholder
+  - id: 22-conclusion
+    title: 第 22 章 结论
+    source: docs/ch22.md
+    status: placeholder
+  - id: 23-summary
+    title: 总结
+    source: docs/summary.md
+    status: placeholder

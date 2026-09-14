@@ -1,8 +1,26 @@
+# Grok博客 catalog: theme → book → episode
+# Episode titles come from the source translation TOC and from episode
+# meta.json already in this repo. Do not invent book facts.
+
+version: 1
+
 themes:
   - id: software-engineering
+    title: 软件工程
     name: 软件工程
+    path: books/software-engineering
     books:
-      - slug: a-philosophy-of-software-design
-        title: 软件设计的哲学（第二版）
-        title_en: A Philosophy of Software Design, 2nd Ed.
+      - id: a-philosophy-of-software-design
+        slug: a-philosophy-of-software-design
         path: books/software-engineering/a-philosophy-of-software-design
+        title:
+          en: A Philosophy of Software Design, 2nd Edition
+          zh: 软件设计的哲学，第二版
+        title_en: A Philosophy of Software Design, 2nd Edition
+        author: John Ousterhout
+        source:
+          translation:
+            name: yingang/aposd2e-zh
+            url: https://github.com/yingang/aposd2e-zh
+            license: CC-BY 4.0
+            note: 《软件设计的哲学，第二版》中文翻译
