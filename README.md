@@ -34,23 +34,14 @@ tools/
 
 来源仓库：[yingang/aposd2e-zh](https://github.com/yingang/aposd2e-zh)（[CC-BY 4.0](https://github.com/yingang/aposd2e-zh/blob/main/LICENSE)）。已完成剧集的脚本文为口语化改编，非原文照搬；请保留署名。请勿编造未出现在来源中的书籍事实。章节标题见该书 `INDEX.md`。
 
-## 用 Grok Voice 制作一集
+## 获取音频与制作
 
-引擎：xAI Grok Voice TTS（`https://api.x.ai/v1/tts`）。默认音色 `ara`，语言 `zh`。
+MP3 通过 Git LFS 保存。克隆后在已安装 Git LFS 的环境中运行 `git lfs pull` 获取音频；
+仓库中的 LFS pointer 只表示对象已登记，不代表已试听或验证音质。
 
-需要 [xAI API key](https://docs.x.ai/)（环境变量 / GitHub secret：`XAI_API_KEY`，或本机 `~/.grok/auth.json`）。
-
-```sh
-export XAI_API_KEY=your-key
-python tools/produce_episode.py --script tools/examples/hello-zh.txt --output /tmp/hello.mp3
-
-# 与 main 上已有用法兼容：位置参数，默认写出同目录 audio.mp3
-python tools/produce_episode.py books/software-engineering/a-philosophy-of-software-design/episodes/00-preface/script.md
-
-python tools/produce_episode.py --episode books/software-engineering/a-philosophy-of-software-design/episodes/00-preface
-```
-
-仓库已配置 GitHub Actions：`Actions → Produce episode → Run workflow`。详细参数见 [tools/README.md](tools/README.md)。
+制作入口与全部参数见 [生产工具](tools/README.md)：本地 CLI 支持脚本文件、剧集目录和内联文本，
+`--dry-run` 只校验、不调用 API。正式制作需要 xAI 凭证，会调用付费 TTS。
+GitHub Actions 入口为 **Actions → Produce episode → Run workflow**；推回仓库需显式开启 `commit`。
 
 ## 许可
 
