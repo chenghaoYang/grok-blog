@@ -30,7 +30,7 @@ tools/
 
 | 主题 | 书籍 | 作者 | 状态 |
 | --- | --- | --- | --- |
-| 软件工程 | [《软件设计的哲学》第二版中译](books/software-engineering/a-philosophy-of-software-design/) | John Ousterhout | 制作中（前言 + 1–22 章 + 总结；00–03 已有脚本） |
+| 软件工程 | [《软件设计的哲学》第二版中译](books/software-engineering/a-philosophy-of-software-design/) | John Ousterhout | 00–23 共 24 集脚本齐全，音频已登记为 Git LFS 对象 |
 
 来源仓库：[yingang/aposd2e-zh](https://github.com/yingang/aposd2e-zh)（[CC-BY 4.0](https://github.com/yingang/aposd2e-zh/blob/main/LICENSE)）。已完成剧集的脚本文为口语化改编，非原文照搬；请保留署名。请勿编造未出现在来源中的书籍事实。章节标题见该书 `INDEX.md`。
 
